@@ -5,8 +5,22 @@
  * and IAM policies, plus role creation/attachment
  * that is needed for storage offloading in Pulsar.
  *
- * See the parame
+ * This bucket also enables bucket encrpytion by default
  *
+ * See the parameters for full details but here is an example usage:
+ *
+ * ```
+ * module "storage_offloading" {
+ *   source = "provision/aws_tiered_storage"
+ *   bucket_name = "myorg-pulsar-offload-us-east-1"
+ *   bucket_tags = {
+ *     Project = "MyApp"
+ *     Environment = "Prod"
+ *   }
+ *   # attach policy to existing role
+ *   existing_role_name = "my-pulsar-cluster-role"
+ * }
+ * ```
  */
 provider "aws" {
 }
@@ -17,7 +31,8 @@ variable "bucket_name" {
 
 variable "bucket_tags" {
   description = "the tags to add to the bucket"
-  default     = []
+  default     = {}
+  type        = map(string)
 }
 
 variable "existing_role_name" {

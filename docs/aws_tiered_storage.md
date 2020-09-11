@@ -4,7 +4,22 @@ This terraform module creates the needed s3 bucket
 and IAM policies, plus role creation/attachment  
 that is needed for storage offloading in Pulsar.
 
-See the parame
+This bucket also enables bucket encrpytion by default
+
+See the parameters for full details but here is an example usage:
+
+```
+module "storage_offloading" {
+  source = "provision/aws_tiered_storage"
+  bucket_name = "myorg-pulsar-offload-us-east-1"
+  bucket_tags = {
+    Project = "MyApp"
+    Environment = "Prod"
+  }
+  # attach policy to existing role
+  existing_role_name = "my-pulsar-cluster-role"
+}
+```
 
 ## Requirements
 
@@ -21,7 +36,7 @@ No requirements.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | bucket\_name | the name of the s3 bucket | `any` | n/a | yes |
-| bucket\_tags | the tags to add to the bucket | `list` | `[]` | no |
+| bucket\_tags | the tags to add to the bucket | `map(string)` | `{}` | no |
 | existing\_role\_name | an optional existing role name, if not provided, a role with role\_name will be created | `string` | `""` | no |
 | role\_name | the name of the role to be created (if existing\_role\_name is not provided) | `string` | `"pulsar-offload-role"` | no |
 
