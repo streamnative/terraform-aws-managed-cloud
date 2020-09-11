@@ -1,3 +1,13 @@
+/**
+ * # Tiered Storage for AWS
+ *
+ * This terraform module creates the needed s3 bucket
+ * and IAM policies, plus role creation/attachment
+ * that is needed for storage offloading in Pulsar.
+ *
+ * See the parame
+ *
+ */
 provider "aws" {
 }
 
@@ -101,9 +111,12 @@ output "role_arn" {
   value       = coalesce(element(data.aws_iam_role.existing.*.arn, 0), element(aws_iam_role.pulsar_offload.*.arn, 0))
   description = "the arn of the role"
 }
+
 output "s3_bucket" {
   value = aws_s3_bucket.pulsar_offload.bucket
+  description = "the name of the bucket used for offloading"
 }
 output "s3_bucket_arn" {
   value = aws_s3_bucket.pulsar_offload.arn
+  description = "the arn of the bucket used for offloading"
 }
