@@ -5,7 +5,13 @@
  * an existing role and attaches the specified policy.
  * This is primarily to be used by other modules
  */
-provider "aws" {
+terraform {
+  required_providers {
+    aws = {
+      version = ">= 2.70.0"
+      source  = "hashicorp/aws"
+    }
+  }
 }
 
 variable "role_tags" {
