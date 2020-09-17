@@ -1,0 +1,78 @@
+name: "TF GH Action"
+on:
+  - pull_request
+
+env:
+  TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
+
+jobs:
+  fmt:
+    name: "fmt"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1.2.0
+        with:
+          terraform_version: 0.12.26
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -recursive -write=false -check -diff .
+        continue-on-error: true
+
+      - name: Post Github Comment
+        uses: actions/github-script@v3.0.0
+        if: github.event_name == 'pull_request' && steps.fmt.outputs.exitcode != 0
+        env:
+          TF_FMT_STDOUT: "${{ steps.fmt.outputs.stdout }}"
+          GIT_COMMIT_GH_USER: "${{ github.event.sender.login }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style Failed 🔥
+
+            Hi @${process.env.GIT_COMMIT_GH_USER}, you have Terraform code that is improperly formatted.
+
+            To fix this, please run:
+            \`\`\`bash
+            terraform fmt -recursive .
+            \`\`\`
+
+            <details><summary>Show fmt output</summary>
+
+            \`\`\`diff
+            ${process.env.TF_FMT_STDOUT}
+            \`\`\`
+
+            </details>`;
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+            core.setFailed(" Please run: terraform fmt -recursive");
+
+  validate:
+    name: "validate"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        terraform_version: [0.12.26, 0.13.2]
+    steps:
+      - name: Checkout
+        uses: Iterable/checkout@v2.3.1
+
+      - name: Setup Terraform ${{ matrix.terraform_version }}
+        uses: Iterable/setup-terraform@v1.1.0
+        with:
+          terraform_version: ${{ matrix.terraform_version }}
+
+      - name: Terraform Validate
+        id: validate
+        run: for example in examples/*/; do cd "${GITHUB_WORKSPACE}/${example}" && terraform init -backend=false && terraform validate -no-color ; done
