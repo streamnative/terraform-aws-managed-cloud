@@ -15,7 +15,7 @@
  *   source = "provision/aws_vault_resources"
  *   prefix = "myorg-prod"
  *   resource_tags = {
- *     Enviroment => "Production"
+ *     Enviroment: "Production"
  *   }
  *   # attach policy to existing role
  *   existing_role_name = "my-existing-cluster-role"
@@ -91,7 +91,7 @@ resource "aws_kms_alias" "vault_key" {
   target_key_id = aws_kms_key.vault_key.id
 }
 
-data "aws_iam_policy_document" "vault_policy" {
+data "aws_iam_policy_document" "role_policy" {
   // list and describe actions that are unqualified
   statement {
     actions = [
@@ -140,52 +140,24 @@ data "aws_iam_policy_document" "vault_policy" {
 
 }
 
+module "role" {
+  source             = "../aws_role"
+  existing_role_name = var.existing_role_name
+  role_name          = var.role_name
 
-resource "aws_iam_instance_profile" "vault_role" {
-  count = var.existing_role_name != "" ? 0 : 1
-  name  = element(aws_iam_role.vault_role.*.name, 0)
-  role  = element(aws_iam_role.vault_role.*.name, 0)
-}
+  role_policy_name = "${var.prefix}-vault-resources"
+  role_policy      = data.aws_iam_policy_document.role_policy.json
 
-resource "aws_iam_role" "vault_role" {
-  count              = var.existing_role_name != "" ? 0 : 1
-  name               = var.existing_role_name
-  assume_role_policy = data.aws_iam_policy_document.vault_assume.json
-}
-
-resource "aws_iam_role_policy" "vault_policy" {
-  name = "${var.prefix}-policy"
-  role = coalesce(var.existing_role_name, element(aws_iam_role.vault_role.*.name, 0))
-
-  policy = data.aws_iam_policy_document.vault_policy.json
-}
-
-data "aws_iam_policy_document" "vault_assume" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type = "Service"
-
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_role" "existing" {
-  count = var.existing_role_name != "" ? 1 : 0
-  name  = var.existing_role_name
 }
 
 
 output "role_name" {
-  value       = coalesce(var.existing_role_name, element(aws_iam_role.vault_role.*.name, 0))
+  value       = module.role.role_name
   description = "the name of the role"
 }
 
 output "role_arn" {
-  value       = coalesce(element(data.aws_iam_role.existing.*.arn, 0), element(aws_iam_role.vault_role.*.arn, 0))
+  value       = module.role.role_arn
   description = "the arn of the role"
 }
 
