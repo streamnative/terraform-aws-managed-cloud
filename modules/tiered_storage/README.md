@@ -10,7 +10,7 @@ See the parameters for full details but here is an example usage:
 
 ```
 module "storage_offloading" {
-  source = "provision/aws_tiered_storage"
+  source = "streamnative/managed-cloud/aws"
   bucket_name = "myorg-pulsar-offload-us-east-1"
   bucket_tags = {
     Project = "MyApp"
@@ -23,13 +23,15 @@ module "storage_offloading" {
 
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| aws | >= 2.70.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | n/a |
+| aws | >= 2.70.0 |
 
 ## Inputs
 

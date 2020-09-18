@@ -12,7 +12,7 @@
  *
  * ```
  * module "aws_vault" {
- *   source = "provision/aws_vault_resources"
+ *   source = "streamnative/managed-cloud/aws//vault_resources"
  *   prefix = "myorg-prod"
  *   resource_tags = {
  *     Enviroment: "Production"
@@ -147,7 +147,7 @@ data "aws_iam_policy_document" "role_policy" {
 }
 
 module "role" {
-  source             = "../aws_role"
+  source             = "../base_role"
   existing_role_name = var.existing_role_name
   role_name          = var.role_name
 

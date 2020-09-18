@@ -73,6 +73,14 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform_version }}
 
-      - name: Terraform Validate
-        id: validate
-        run: for example in examples/*/; do cd "${GITHUB_WORKSPACE}/${example}" && terraform init -backend=false && terraform validate -no-color ; done
+      - name: Terraform Validate Root
+        id: validate-root
+        run: cd "${GITHUB_WORKSPACE}" && terraform init -backend=false && AWS_REGION=us-east-1 terraform validate -no-color
+
+      - name: Terraform Validate Modules
+        id: validate-modules
+        run: for modules in modules/*/; do cd "${GITHUB_WORKSPACE}/${module}" && terraform init -backend=false && AWS_REGION=us-east-1 terraform validate -no-color ; done
+
+      - name: Terraform Validate Examples
+        id: validate-examples
+        run: for example in examples/*/; do cd "${GITHUB_WORKSPACE}/${example}" && terraform init -backend=false && AWS_REGION=us-east-1 terraform validate -no-color ; done
