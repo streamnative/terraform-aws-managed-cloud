@@ -9,8 +9,8 @@ This bucket also enables bucket encrpytion by default
 See the parameters for full details but here is an example usage:
 
 ```
-module "storage_offloading" {
-  source = "streamnative/managed-cloud/aws"
+module "tiered_storage" {
+  source = "streamnative/managed-cloud/aws//tiered_storage"
   bucket_name = "myorg-pulsar-offload-us-east-1"
   bucket_tags = {
     Project = "MyApp"
