@@ -1,7 +1,6 @@
 #!/bin/sh
 
-for dir in /input/*; do
-  name=$(basename "$dir")
-  echo "generating docs for $dir, outtputting to docs/$name.md"
-  /usr/local/bin/terraform-docs markdown "$dir" > /output/"$name".md
+for dir in /modules/*; do
+  echo "generating docs for $dir, outputting to $dir/README.md"
+  /usr/local/bin/terraform-docs markdown "$dir" > /$dir/README.md
 done

@@ -10,8 +10,8 @@
  * See the parameters for full details but here is an example usage:
  *
  * ```
- * module "storage_offloading" {
- *   source = "provision/aws_tiered_storage"
+ * module "tiered_storage" {
+ *   source = "streamnative/managed-cloud/aws//tiered_storage"
  *   bucket_name = "myorg-pulsar-offload-us-east-1"
  *   bucket_tags = {
  *     Project = "MyApp"
@@ -68,7 +68,7 @@ resource "aws_s3_bucket" "pulsar_offload" {
 
 
 module "role" {
-  source             = "../aws_role"
+  source             = "../base_role"
   existing_role_name = var.existing_role_name
   role_name          = var.role_name
 
