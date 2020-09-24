@@ -52,6 +52,37 @@ variable "streamnative_arns" {
   description = "the arns to grant assume role to, will be principals from streamnative"
 }
 
+variable "allow_iam_policy_create" {
+  description = "will grant this policy the permission to create IAM policies, which is required by some of our modules, but not actually the ability to attach those policies"
+  type        = bool
+  default     = true
+}
+
+variable "allow_vault_management" {
+  description = "will grant this policy permisions to manage a dynamo table and KMS key/alias, which can be limited by `dynamo_table_prefix` and `kms_alias_prefix` options respectively"
+  type        = bool
+  default     = true
+}
+
+variable "allow_tiered_storage_management" {
+  description = "will grant this policy permisions to manage an s3 bucket, which can be limited by `s3_bucket_prefix` option"
+  type        = bool
+  default     = true
+}
+
+variable "allow_eks_management" {
+  description = "will grant this policy all permissions need to create and manage EKS clusters, which includes EC2, VPC, and many other permissions"
+  type        = bool
+  default     = false
+}
+
+variable "allow_iam_management" {
+  description = "will grant this policy IAM permissions to create and manage roles and policies, which can allow privilege escalation"
+  type        = bool
+  default     = false
+}
+
+
 variable "s3_bucket_prefix" {
   description = "a prefix that can limit the buckets this role can manage"
   default     = ""
@@ -85,6 +116,11 @@ module "policy" {
   source      = "../bootstrap_policy"
   policy_name = coalesce(var.policy_name, var.role_name)
 
+  allow_iam_policy_create         = var.allow_iam_policy_create
+  allow_vault_management          = var.allow_vault_management
+  allow_tiered_storage_management = var.allow_tiered_storage_management
+  allow_eks_management            = var.allow_eks_management
+  allow_iam_management            = var.allow_iam_management
 
   s3_bucket_prefix    = var.s3_bucket_prefix
   dynamo_table_prefix = var.dynamo_table_prefix

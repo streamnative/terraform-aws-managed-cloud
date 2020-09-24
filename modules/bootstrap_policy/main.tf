@@ -2,28 +2,24 @@
  * # Bootstrap Policy
  *
  * This terraform module creates an IAM policy that contains
- * all of the permissions needed to bootstrap the underlying AWS resources
+ * the permissions needed to bootstrap the underlying AWS resources
  * needed for a StreamNative cluster, but is *not* used to provision or manage
  * the cluster itself, see the Management policy for details on that policy.
  *
- * NOTE: this policy is not currently as constrained as it can be, we will continue
- * to reduce the needed permissions. Additionally, this is based of eksctl permissions
- * which we will slowly reduce
+ * As different customers have different needs, this policy is configurable
+ * with different levels of access being given based on the options
  *
- * This policy primarily includes the ability to:
- * * manage many ec2, cloudformation, eks, and IAM permissions
- * * create/delete/update dynamodb tables
- * * create/delete/update S3 buckets
- * * create/delete/update KMS keys and aliases
+ * The primary options are as follows, listed in order of increasing access:
+ * - `allow_iam_policy_create`, this is needed for us to manage policies for resources created, but does not include the ability to actually attach those policies
+ * - `allow_vault_management` (and `dynamo_table_prefix`, and `kms_alias_prefix`) allows for managing dynamo and kms key/alias (with optional prefix)
+ * - `allow_tiered_storage_management` (and `s3_bucket_prefix`) allows for managing an s3 bucket with optional prefix
+ * - `allow_eks_management`, this gives a broad set of permissions, including most of ec2, VPC and IAM, for managing EKS clusters and networks. IAM is namespced to `eksctl` roles
+ * - `allow_iam_management`, gives access to create and attach iam roles and policies arbitrarily
  *
- * These permissions can optionally be constrainted (where applicable)
- * by allowing it only to manage a prefix of resources (for s3 buckets, dynamodb tables)
+ * NOTE: the `allow_eks_creation` is not currently as constrained as it can be, we will continue
+ * to reduce the needed permissions.
  *
- * This policy is not intended for usage
- * with the administration/provisioning of the actual StreamNative cluster,
- * where we use a much more constrained policy, this is just for bootsrapping
- *
- * You can simply create this policy and attach to any role *or* use the `bootstrap_role` module
+ * You can simply create this policy and attach to any role/user *or* use the `bootstrap_role` module
  * which creates the role with the needed permissions for streamnative to assume the role.
  *
  * Example:
@@ -45,6 +41,36 @@ terraform {
 
 variable "policy_name" {
   description = "the name of policy to be created"
+}
+
+variable "allow_iam_policy_create" {
+  description = "will grant this policy the permission to create IAM policies, which is required by some of our modules, but not actually the ability to attach those policies"
+  type        = bool
+  default     = true
+}
+
+variable "allow_vault_management" {
+  description = "will grant this policy permisions to manage a dynamo table and KMS key/alias, which can be limited by `dynamo_table_prefix` and `kms_alias_prefix` options respectively"
+  type        = bool
+  default     = true
+}
+
+variable "allow_tiered_storage_management" {
+  description = "will grant this policy permisions to manage an s3 bucket, which can be limited by `s3_bucket_prefix` option"
+  type        = bool
+  default     = true
+}
+
+variable "allow_eks_management" {
+  description = "will grant this policy all permissions need to create and manage EKS clusters, which includes EC2, VPC, and many other permissions"
+  type        = bool
+  default     = false
+}
+
+variable "allow_iam_management" {
+  description = "will grant this policy IAM permissions to create and manage roles and policies, which can allow privilege escalation"
+  type        = bool
+  default     = false
 }
 
 variable "s3_bucket_prefix" {
@@ -73,59 +99,19 @@ locals {
   accountId = data.aws_caller_identity.current.account_id
 }
 
-
-data "aws_iam_policy_document" "provision" {
-  // EKS
+data "aws_iam_policy_document" "iam_policy_create" {
   statement {
     actions = [
-      "eks:*",
+      "iam:GetPolicy*",
+      "iam:CreatePolicy*",
+      "iam:ListPolicies"
     ]
 
-    resources = [
-      "*"
-    ]
+    resources = ["*"]
   }
+}
 
-  statement {
-    actions = [
-      "iam:PassRole",
-    ]
-
-    resources = [
-      "*"
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "iam:PassedToService"
-      values   = ["eks.amazonaws.com"]
-    }
-  }
-
-  // S3 Bucket Perms
-  statement {
-    actions = [
-      "s3:CreateBucket",
-      "s3:GetBucketLocation",
-      "s3:GetBucket*",
-      "s3:PutBucket*"
-    ]
-
-    resources = [
-      "arn:aws:s3:::${var.s3_bucket_prefix}*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "s3:ListAllMyBuckets",
-    ]
-
-    resources = [
-      "*"
-    ]
-  }
-
+data "aws_iam_policy_document" "vault" {
   // Dynamodb
   statement {
     actions = [
@@ -189,6 +175,60 @@ data "aws_iam_policy_document" "provision" {
     ]
 
     resources = ["arn:aws:kms:${var.allowed_regions}:${local.accountId}:alias/${var.kms_alias_prefix}*"]
+  }
+}
+data "aws_iam_policy_document" "tiered_storage" {
+  // S3 Bucket Perms
+  statement {
+    actions = [
+      "s3:CreateBucket",
+      "s3:GetBucketLocation",
+      "s3:GetBucket*",
+      "s3:PutBucket*"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.s3_bucket_prefix}*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:ListAllMyBuckets",
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+
+}
+data "aws_iam_policy_document" "eks" {
+  // EKS
+  statement {
+    actions = [
+      "eks:*",
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:PassRole",
+    ]
+
+    resources = [
+      "*"
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["eks.amazonaws.com"]
+    }
   }
 
   // EC2 (for usage with eksctl)
@@ -299,7 +339,8 @@ data "aws_iam_policy_document" "provision" {
   statement {
     actions = [
       "iam:CreateOpenIDConnectProvider",
-      "iam:DeleteOpenIDConnectProvider"
+      "iam:DeleteOpenIDConnectProvider",
+      "iam:GetOpenIDConnectProvider",
     ]
     resources = [
       "arn:aws:iam::${local.accountId}:oidc-provider/*"
@@ -307,10 +348,64 @@ data "aws_iam_policy_document" "provision" {
   }
 }
 
+data "aws_iam_policy_document" "iam_manager" {
+  statement {
+    actions = [
+      "iam:AddRoleToInstanceProfile",
+      "iam:AttachRolePolicy",
+      "iam:CreateInstanceProfile",
+      "iam:CreatePolicy*",
+      "iam:CreateRole*",
+      "iam:CreateServiceLinkedRole",
+      "iam:DeleteInstanceProfile",
+      "iam:DeletePolicy*",
+      "iam:DeleteRole*",
+      "iam:DeleteServiceLinkedRole",
+      "iam:DetachRolePolicy",
+      "iam:GenerateServiceLastAccessedDetails",
+      "iam:GetAccountAuthorizationDetails",
+      "iam:GetAccountSummary",
+      "iam:GetInstanceProfile",
+      "iam:GetRole*",
+      "iam:GetPolicy*",
+      "iam:ListEntitiesForPolicy",
+      "iam:ListInstanceProfiles",
+      "iam:ListInstanceProfilesForRole",
+      "iam:ListPolicy*",
+      "iam:ListRole*",
+      "iam:PassRole",
+      "iam:PutRolePolicy",
+      "iam:RemoveRoleFromInstanceProfile",
+      "iam:TagRole",
+      "iam:UntagRole",
+      "iam:UpdateAssumeRolePolicy",
+      "iam:UpdateRole",
+    ]
+
+    resources = ["*"]
+  }
+}
+
+locals {
+  policy_creator        = var.allow_iam_policy_create ? [data.aws_iam_policy_document.iam_policy_create.json] : []
+  vault_manage          = var.allow_vault_management ? [data.aws_iam_policy_document.vault.json] : []
+  tiered_storage_manage = var.allow_tiered_storage_management ? [data.aws_iam_policy_document.tiered_storage.json] : []
+  eks_manage            = var.allow_eks_management ? [data.aws_iam_policy_document.eks.json] : []
+  iam_manage            = var.allow_iam_management ? [data.aws_iam_policy_document.iam_manager.json] : []
+  policies              = concat(local.policy_creator, local.vault_manage, local.tiered_storage_manage, local.eks_manage, local.iam_manage)
+}
+
+module "policy_agg" {
+  source  = "cloudposse/iam-policy-document-aggregator/aws"
+  version = "0.6.0"
+
+  source_documents = local.policies
+}
+
 resource "aws_iam_policy" "policy" {
   name = var.policy_name
 
-  policy = data.aws_iam_policy_document.provision.json
+  policy = module.policy_agg.result_document
 }
 
 
@@ -325,7 +420,7 @@ output "policy_arn" {
 }
 
 output "policy_document" {
-  value       = data.aws_iam_policy_document.provision.json
+  value       = module.policy_agg.result_document
   description = "the policy document"
 }
 
