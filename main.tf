@@ -14,6 +14,10 @@ provider "aws" {
 }
 
 
+/**
+* Note: This module takes 2 applies currently because of the
+* the creation and then data reference, this is only really a problem in this example
+*/
 module "role" {
   source        = "./modules/base_policy_role"
   new_role_name = "my-managed-cloud-role"

@@ -81,7 +81,7 @@ data "aws_iam_role" "existing" {
 
 
 resource "aws_iam_instance_profile" "role" {
-  count = var.new_role_name ? 1 : 0
+  count = var.new_role_name != "" ? 1 : 0
   name  = var.new_role_name
   role  = var.new_role_name
 }
