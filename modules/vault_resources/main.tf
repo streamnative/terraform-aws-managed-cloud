@@ -42,19 +42,20 @@ variable "resource_tags" {
 }
 
 variable "existing_role_name" {
-  description = "an optional existing role name, if not provided, a role with role_name will be created"
+  description = "an optional existing role name to attach the policy to"
   default     = ""
 }
 
-variable "role_name" {
-  description = "the name of the role to be created (if existing_role_name is not provided)"
-  default     = "pulsar-vault-role"
+variable "new_role_name" {
+  description = "the name of the role to be created and policy to attach to"
+  default     = ""
 }
 
 variable "dynamo_billing_mode" {
   description = "the billing mode for the dynamodb table that will be created"
   default     = "PAY_PER_REQUEST"
 }
+
 variable "dynamo_provisioned_capacity" {
   description = "when using \"PROVISIONED\" billing mode, the specified values will be use for throughput, in all other modes they are ignored"
   type = object({
@@ -147,24 +148,36 @@ data "aws_iam_policy_document" "role_policy" {
 }
 
 module "role" {
-  source             = "../base_role"
+  source             = "../base_policy_role"
   existing_role_name = var.existing_role_name
-  role_name          = var.role_name
+  new_role_name      = var.new_role_name
 
-  role_policy_name = "${var.prefix}-vault-resources"
-  role_policy      = data.aws_iam_policy_document.role_policy.json
+
+  policy_name = "${var.prefix}-vault-resources"
+  role_policy = data.aws_iam_policy_document.role_policy.json
 
 }
 
 
-output "role_name" {
-  value       = module.role.role_name
-  description = "the name of the role"
+output "role_names" {
+  value       = module.role.role_names
+  description = "the names of the roles"
 }
 
-output "role_arn" {
-  value       = module.role.role_arn
-  description = "the arn of the role"
+output "role_arns" {
+  value       = module.role.role_arns
+  description = "the arns of the roles"
+}
+
+output "policy_name" {
+  value = module.role.policy_name
+}
+output "policy_arn" {
+  value = module.role.policy_arn
+}
+
+output "policy_document" {
+  value = data.aws_iam_policy_document.role_policy.json
 }
 
 output "dynamo_table_name" {

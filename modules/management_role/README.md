@@ -47,6 +47,7 @@ module "mangement_role" {
 
 | Name | Description |
 |------|-------------|
+| policy\_arn | the arn of the policy |
 | policy\_document | the text of the policy |
 | policy\_name | the name of the policy |
 | role\_arn | the arn of the role |

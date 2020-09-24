@@ -45,6 +45,7 @@ module "manager_policy" {
 
 | Name | Description |
 |------|-------------|
+| policy\_arn | the arn of the policy |
 | policy\_document | the policy document |
 | policy\_name | the name of the policy |
 
