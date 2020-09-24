@@ -3,12 +3,12 @@ provider "aws" {
 }
 
 module "boostrap_default" {
-  source = "../../modules/bootstrap_policy"
+  source      = "../../modules/bootstrap_policy"
   policy_name = "streamnative-mc-bootstrap-default"
 }
 
 module "boostrap_full" {
-  source = "../../modules/bootstrap_policy"
+  source      = "../../modules/bootstrap_policy"
   policy_name = "streamnative-mc-bootstrap-full"
 
   allow_eks_management = true
