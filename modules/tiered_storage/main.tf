@@ -42,13 +42,13 @@ variable "bucket_tags" {
 }
 
 variable "existing_role_name" {
-  description = "an optional existing role name, if not provided, a role with role_name will be created"
+  description = "an optional existing role name to attach the policy to"
   default     = ""
 }
 
-variable "role_name" {
-  description = "the name of the role to be created (if existing_role_name is not provided)"
-  default     = "pulsar-offload-role"
+variable "new_role_name" {
+  description = "an optional role name to create and attach the policy to"
+  default     = ""
 }
 
 resource "aws_s3_bucket" "pulsar_offload" {
@@ -68,12 +68,12 @@ resource "aws_s3_bucket" "pulsar_offload" {
 
 
 module "role" {
-  source             = "../base_role"
+  source             = "../base_policy_role"
   existing_role_name = var.existing_role_name
-  role_name          = var.role_name
+  new_role_name      = var.new_role_name
 
-  role_policy_name = "pulsar_offload"
-  role_policy      = data.aws_iam_policy_document.pulsar_offload.json
+  policy_name = "pulsar_offload"
+  role_policy = data.aws_iam_policy_document.pulsar_offload.json
 
 }
 
@@ -95,14 +95,25 @@ data "aws_iam_policy_document" "pulsar_offload" {
   }
 }
 
-output "role_name" {
-  value       = module.role.role_name
-  description = "the name of the role"
+output "role_names" {
+  value       = module.role.role_names
+  description = "the names of the roles"
 }
 
 output "role_arn" {
-  value       = module.role.role_arn
-  description = "the arn of the role"
+  value       = module.role.role_arns
+  description = "the arns of the roles"
+}
+
+output "policy_name" {
+  value = module.role.policy_name
+}
+output "policy_arn" {
+  value = module.role.policy_arn
+}
+
+output "policy_document" {
+  value = data.aws_iam_policy_document.pulsar_offload.json
 }
 
 output "s3_bucket" {
