@@ -7,6 +7,20 @@ a dynamodb table, kms key, and the needed IAM policies.
 This policy can be attached either to an existing role or  
 this module can optionally create new role with this policy attached
 
+See the parameters for full details but here is an example usage:
+
+```
+module "aws_vault" {
+  source = "streamnative/managed-cloud/aws//vault_resources"
+  prefix = "myorg-prod"
+  resource_tags = {
+    Enviroment: "Production"
+  }
+  # attach policy to existing role
+  existing_role_name = "my-existing-cluster-role"
+}
+```
+
 ## Requirements
 
 | Name | Version |

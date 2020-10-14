@@ -7,7 +7,7 @@
  *
  * This policy can be attached either to an existing role or
  * this module can optionally create new role with this policy attached
-
+ *
  * See the parameters for full details but here is an example usage:
  *
  * ```
@@ -83,8 +83,8 @@ resource "aws_dynamodb_table" "vault_table" {
     type = "S"
   }
 
-  write_capacity = var.dynamo_provisioned_capacity.write
-  read_capacity  = var.dynamo_provisioned_capacity.read
+  write_capacity = var.dynamo_billing_mode == "PROVISIONED" ? var.dynamo_provisioned_capacity.write : 0
+  read_capacity  = var.dynamo_billing_mode == "PROVISIONED" ? var.dynamo_provisioned_capacity.read : 0
 
   tags = var.resource_tags
 }

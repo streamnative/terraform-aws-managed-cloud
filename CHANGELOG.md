@@ -1,3 +1,8 @@
+## v0.2.1 - Fix bootstrap_policy and dynamo modules
+
+* The bootstrap_policy module was missing a number of IAM permissions
+* The dynamo policy would always have changes for the read/write capacity
+
 ## v0.2.0 - Add modules for role/policies for streamnative management
 
 * Adds the bootstrap_policy and bootstrap_role modules that

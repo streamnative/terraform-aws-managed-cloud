@@ -99,6 +99,16 @@ locals {
   accountId = data.aws_caller_identity.current.account_id
 }
 
+data "aws_iam_policy_document" "base_permissions" {
+  statement {
+    actions = [
+      "ec2:DescribeAccountAttributes"
+    ]
+
+    resources = ["*"]
+  }
+}
+
 data "aws_iam_policy_document" "iam_policy_create" {
   statement {
     actions = [
@@ -117,8 +127,10 @@ data "aws_iam_policy_document" "vault" {
     actions = [
       "dynamodb:CreateTable*",
       "dynamodb:Describe*",
+      "dynamodb:DeleteTable*",
       "dynamodb:UpdateTable*",
       "dynamodb:UpdateTimeToLive",
+      "dynamodb:ListTagsOfResource",
       "dynamodb:TagResource",
       "dynamodb:UntagResource",
       "dynamodb:CreateBackup",
@@ -137,6 +149,7 @@ data "aws_iam_policy_document" "vault" {
     actions = [
       "dynamodb:CreateGlobalTable",
       "dynamodb:DescribeGlobal*",
+      "dynamodb:DeleteGlobalTable*",
       "dynamodb:UpdateGlobal*",
     ]
 
@@ -160,21 +173,21 @@ data "aws_iam_policy_document" "vault" {
   // KMS
   statement {
     actions = [
+      "kms:CreateAlias",
       "kms:CreateKey",
+      "kms:DescribeKey",
+      "kms:DeleteAlias",
+      "kms:DeleteKey",
+      "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus",
       "kms:ListKeys",
       "kms:ListAliases",
+      "kms:ListResourceTags",
+      "kms:ScheduleKeyDeletion",
       "kms:TagResource"
     ]
 
-    resources = ["arn:aws:kms:${var.allowed_regions}:${local.accountId}:*"]
-  }
-
-  statement {
-    actions = [
-      "kms:CreateAlias",
-    ]
-
-    resources = ["arn:aws:kms:${var.allowed_regions}:${local.accountId}:alias/${var.kms_alias_prefix}*"]
+    resources = ["*"]
   }
 }
 data "aws_iam_policy_document" "tiered_storage" {
@@ -182,9 +195,17 @@ data "aws_iam_policy_document" "tiered_storage" {
   statement {
     actions = [
       "s3:CreateBucket",
-      "s3:GetBucketLocation",
-      "s3:GetBucket*",
-      "s3:PutBucket*"
+      "s3:DeleteBucket",
+      "s3:PutAccelerateConfiguration",
+      "s3:PutAccessPointPolicy",
+      "s3:PutAccountPublicAccessBlock",
+      "s3:PutAnalyticsConfiguration",
+      "s3:PutBucket*",
+      "s3:PutEncryptionConfiguration",
+      "s3:PutInventoryConfiguration",
+      "s3:PutLifecycleConfiguration",
+      "s3:PutMetricsConfiguration",
+      "s3:PutReplicationConfiguration",
     ]
 
     resources = [
@@ -194,7 +215,19 @@ data "aws_iam_policy_document" "tiered_storage" {
 
   statement {
     actions = [
+      "s3:GetAccelerateConfiguration",
+      "s3:GetAccessPointPolicy",
+      "s3:GetAccountPublicAccessBlock",
+      "s3:GetAnalyticsConfiguration",
+      "s3:GetBucket*",
+      "s3:GetBucketLocation",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetInventoryConfiguration",
+      "s3:GetLifecycleConfiguration",
+      "s3:GetMetricsConfiguration",
+      "s3:GetReplicationConfiguration",
       "s3:ListAllMyBuckets",
+      "s3:ListBucket",
     ]
 
     resources = [
@@ -368,6 +401,7 @@ data "aws_iam_policy_document" "iam_manager" {
       "iam:GetInstanceProfile",
       "iam:GetRole*",
       "iam:GetPolicy*",
+      "iam:ListAttached*",
       "iam:ListEntitiesForPolicy",
       "iam:ListInstanceProfiles",
       "iam:ListInstanceProfilesForRole",
@@ -392,7 +426,7 @@ locals {
   tiered_storage_manage = var.allow_tiered_storage_management ? [data.aws_iam_policy_document.tiered_storage.json] : []
   eks_manage            = var.allow_eks_management ? [data.aws_iam_policy_document.eks.json] : []
   iam_manage            = var.allow_iam_management ? [data.aws_iam_policy_document.iam_manager.json] : []
-  policies              = concat(local.policy_creator, local.vault_manage, local.tiered_storage_manage, local.eks_manage, local.iam_manage)
+  policies              = concat([data.aws_iam_policy_document.base_permissions.json], local.policy_creator, local.vault_manage, local.tiered_storage_manage, local.eks_manage, local.iam_manage)
 }
 
 module "policy_agg" {
