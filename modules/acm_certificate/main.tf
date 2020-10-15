@@ -33,8 +33,8 @@ variable "domain_name" {
 
 variable "additional_domain_names" {
   description = "Set of domains that should be SANs in the issued certificate."
-  type = list(string)
-  default = [] 
+  type        = list(string)
+  default     = []
 }
 
 variable "hosted_zone_id" {
@@ -61,19 +61,19 @@ variable "tags" {
 }
 
 resource "aws_acm_certificate" "pulsar_certificate" {
-  domain_name = var.domain_name
+  domain_name               = var.domain_name
   subject_alternative_names = var.additional_domain_names
-  validation_method = "DNS"
+  validation_method         = "DNS"
   tags = merge(
     {
-      Name = var.domain_name
-      CreatedTime = timestamp() 
+      Name        = var.domain_name
+      CreatedTime = timestamp()
     },
     var.tags,
   )
   lifecycle {
-    create_before_destroy = true 
-  } 
+    create_before_destroy = true
+  }
 }
 
 resource "aws_route53_record" "pulsar_certificate_validation" {

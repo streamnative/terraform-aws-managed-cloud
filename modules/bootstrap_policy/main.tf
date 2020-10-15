@@ -15,6 +15,7 @@
  * - `allow_tiered_storage_management` (and `s3_bucket_prefix`) allows for managing an s3 bucket with optional prefix
  * - `allow_eks_management`, this gives a broad set of permissions, including most of ec2, VPC and IAM, for managing EKS clusters and networks. IAM is namespced to `eksctl` roles
  * - `allow_iam_management`, gives access to create and attach iam roles and policies arbitrarily
+ * - `allow_acm_certificate_management`, gives access to create ACM certificate and validate certificate through Route53
  *
  * NOTE: the `allow_eks_creation` is not currently as constrained as it can be, we will continue
  * to reduce the needed permissions.
@@ -71,6 +72,12 @@ variable "allow_iam_management" {
   description = "will grant this policy IAM permissions to create and manage roles and policies, which can allow privilege escalation"
   type        = bool
   default     = false
+}
+
+variable "allow_acm_certificate_management" {
+  description = "will grant this policy IAM permissions to create ACM certificate and validate certificate through Route53"
+  type        = bool
+  default     = true
 }
 
 variable "s3_bucket_prefix" {
@@ -420,13 +427,61 @@ data "aws_iam_policy_document" "iam_manager" {
   }
 }
 
+data "aws_iam_policy_document" "acm_certificate" {
+  // request certificate
+  statement {
+    actions = [
+      "acm:AddTagsToCertificate",
+      "acm:DeleteCertificate",
+      "acm:DescribeCertificate",
+      "acm:ExportCertificate",
+      "acm:GetCertificate",
+      "acm:ImportCertificate",
+      "acm:ListCertificates",
+      "acm:ListTagsForCertificate",
+      "acm:RemoveTagsFromCertificate",
+      "acm:RequestCertificate",
+      "acm:ResendValidationEmail"
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+
+  // DNS validation
+  statement {
+    actions = [
+      "route53:GetChange",
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets"
+    ]
+
+    resources = [
+      "arn:aws:route53:::hostedzone/*",
+      "arn:aws:route53:::change/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "route53:ListHostedZonesByName"
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+}
+
 locals {
   policy_creator        = var.allow_iam_policy_create ? [data.aws_iam_policy_document.iam_policy_create.json] : []
   vault_manage          = var.allow_vault_management ? [data.aws_iam_policy_document.vault.json] : []
   tiered_storage_manage = var.allow_tiered_storage_management ? [data.aws_iam_policy_document.tiered_storage.json] : []
   eks_manage            = var.allow_eks_management ? [data.aws_iam_policy_document.eks.json] : []
   iam_manage            = var.allow_iam_management ? [data.aws_iam_policy_document.iam_manager.json] : []
-  policies              = concat([data.aws_iam_policy_document.base_permissions.json], local.policy_creator, local.vault_manage, local.tiered_storage_manage, local.eks_manage, local.iam_manage)
+  acm_cert_manage       = var.allow_acm_certificate_management ? [data.aws_iam_policy_document.acm_certificate.json] : []
+  policies              = concat([data.aws_iam_policy_document.base_permissions.json], local.policy_creator, local.vault_manage, local.tiered_storage_manage, local.eks_manage, local.iam_manage, local.acm_cert_manage)
 }
 
 module "policy_agg" {

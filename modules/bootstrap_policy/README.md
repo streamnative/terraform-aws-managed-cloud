@@ -14,6 +14,7 @@ The primary options are as follows, listed in order of increasing access:
 - `allow_tiered_storage_management` (and `s3_bucket_prefix`) allows for managing an s3 bucket with optional prefix
 - `allow_eks_management`, this gives a broad set of permissions, including most of ec2, VPC and IAM, for managing EKS clusters and networks. IAM is namespced to `eksctl` roles
 - `allow_iam_management`, gives access to create and attach iam roles and policies arbitrarily
+- `allow_acm_certificate_management`, gives access to create ACM certificate and validate certificate through Route53
 
 NOTE: the `allow_eks_creation` is not currently as constrained as it can be, we will continue  
 to reduce the needed permissions.
@@ -45,6 +46,7 @@ module "bootstrap_policy" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| allow\_acm\_certificate\_management | will grant this policy IAM permissions to create ACM certificate and validate certificate through Route53 | `bool` | `true` | no |
 | allow\_eks\_management | will grant this policy all permissions need to create and manage EKS clusters, which includes EC2, VPC, and many other permissions | `bool` | `false` | no |
 | allow\_iam\_management | will grant this policy IAM permissions to create and manage roles and policies, which can allow privilege escalation | `bool` | `false` | no |
 | allow\_iam\_policy\_create | will grant this policy the permission to create IAM policies, which is required by some of our modules, but not actually the ability to attach those policies | `bool` | `true` | no |
