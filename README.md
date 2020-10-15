@@ -17,4 +17,6 @@ This role should be the instance profile that is used for your Pulsar brokers.
 
 See `modules/vault_resources`. This creates a dynamodb table and KMS key needed for the vault instance running in your managed cluster. It also generates the proper IAM policy, which can either be attached to an existing role or provision a new role specifically for these needs.
 
+### ACM Certificate Resources
 
+See `modules/acm_certificate`. This creates a ACM certificate needed for provisioning load balancers for your managed Pulsar cluster.
