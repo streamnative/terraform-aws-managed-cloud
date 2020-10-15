@@ -126,12 +126,12 @@ module "policy" {
   source      = "../bootstrap_policy"
   policy_name = coalesce(var.policy_name, var.role_name)
 
-  allow_iam_policy_create           = var.allow_iam_policy_create
-  allow_vault_management            = var.allow_vault_management
-  allow_tiered_storage_management   = var.allow_tiered_storage_management
-  allow_eks_management              = var.allow_eks_management
-  allow_iam_management              = var.allow_iam_management
-  allow_acm_certificate_management  = var.allow_acm_certificate_management 
+  allow_iam_policy_create          = var.allow_iam_policy_create
+  allow_vault_management           = var.allow_vault_management
+  allow_tiered_storage_management  = var.allow_tiered_storage_management
+  allow_eks_management             = var.allow_eks_management
+  allow_iam_management             = var.allow_iam_management
+  allow_acm_certificate_management = var.allow_acm_certificate_management
 
   s3_bucket_prefix    = var.s3_bucket_prefix
   dynamo_table_prefix = var.dynamo_table_prefix
