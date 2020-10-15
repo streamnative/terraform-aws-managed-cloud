@@ -100,6 +100,12 @@ variable "allowed_regions" {
   default     = "*"
 }
 
+variable "hostedzones_arns" {
+  description = "the arns of the allowed hostedzones"
+  type        = list(string)
+  default     = ["arn:aws:route53:::hostedzone/*"]
+}
+
 data "aws_caller_identity" "current" {}
 
 locals {
@@ -452,19 +458,16 @@ data "aws_iam_policy_document" "acm_certificate" {
   // DNS validation
   statement {
     actions = [
-      "route53:GetChange",
       "route53:ChangeResourceRecordSets",
       "route53:ListResourceRecordSets"
     ]
 
-    resources = [
-      "arn:aws:route53:::hostedzone/*",
-      "arn:aws:route53:::change/*"
-    ]
+    resources = var.hostedzones_arns
   }
 
   statement {
     actions = [
+      "route53:GetChange",
       "route53:ListHostedZonesByName"
     ]
 

@@ -82,6 +82,11 @@ variable "allow_iam_management" {
   default     = false
 }
 
+variable "allow_acm_certificate_management" {
+  description = "will grant this policy IAM permissions to create ACM certificate and validate certificate through Route53"
+  type        = bool
+  default     = true
+}
 
 variable "s3_bucket_prefix" {
   description = "a prefix that can limit the buckets this role can manage"
@@ -103,6 +108,11 @@ variable "allowed_regions" {
   default     = "*"
 }
 
+variable "hostedzones_arns" {
+  description = "the arns of the allowed hostedzones"
+  type        = list(string)
+  default     = ["arn:aws:route53:::hostedzone/*"]
+}
 
 module "role" {
   source    = "../streamnative_role"
@@ -116,16 +126,18 @@ module "policy" {
   source      = "../bootstrap_policy"
   policy_name = coalesce(var.policy_name, var.role_name)
 
-  allow_iam_policy_create         = var.allow_iam_policy_create
-  allow_vault_management          = var.allow_vault_management
-  allow_tiered_storage_management = var.allow_tiered_storage_management
-  allow_eks_management            = var.allow_eks_management
-  allow_iam_management            = var.allow_iam_management
+  allow_iam_policy_create           = var.allow_iam_policy_create
+  allow_vault_management            = var.allow_vault_management
+  allow_tiered_storage_management   = var.allow_tiered_storage_management
+  allow_eks_management              = var.allow_eks_management
+  allow_iam_management              = var.allow_iam_management
+  allow_acm_certificate_management  = var.allow_acm_certificate_management 
 
   s3_bucket_prefix    = var.s3_bucket_prefix
   dynamo_table_prefix = var.dynamo_table_prefix
   kms_alias_prefix    = var.kms_alias_prefix
   allowed_regions     = var.allowed_regions
+  hostedzones_arns    = var.hostedzones_arns
 }
 
 resource "aws_iam_role_policy_attachment" "attach" {

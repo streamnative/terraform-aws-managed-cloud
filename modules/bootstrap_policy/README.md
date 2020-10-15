@@ -54,6 +54,7 @@ module "bootstrap_policy" {
 | allow\_vault\_management | will grant this policy permisions to manage a dynamo table and KMS key/alias, which can be limited by `dynamo_table_prefix` and `kms_alias_prefix` options respectively | `bool` | `true` | no |
 | allowed\_regions | if you want to constrain this role to a given region, specify this property, otherwise, all regions are allowed | `string` | `"*"` | no |
 | dynamo\_table\_prefix | a prefix that can limit the tables this role can manage | `string` | `""` | no |
+| hostedzones\_arns | the arns of the allowed hostedzones | `list(string)` | <pre>[<br>  "arn:aws:route53:::hostedzone/*"<br>]</pre> | no |
 | kms\_alias\_prefix | a prefix that can limit the kms aliases this role can manage | `string` | `""` | no |
 | policy\_name | the name of policy to be created | `any` | n/a | yes |
 | s3\_bucket\_prefix | a prefix that can limit the buckets this role can manage | `string` | `""` | no |
