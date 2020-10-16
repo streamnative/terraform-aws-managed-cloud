@@ -1,3 +1,7 @@
+## v0.3.1 - Add additional route53 policy for lookups
+
+* Adds `route53:ListHostedZones` to the bootstrap policy
+
 ## v0.3.0 - Add module for ACM certs, update bootstrap policy to support it
 
 * Adds the `acm_certificate` module
