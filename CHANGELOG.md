@@ -1,3 +1,8 @@
+## v0.3.0 - Add module for ACM certs, update bootstrap policy to support it
+
+* Adds the `acm_certificate` module
+* Add support to `bootstrap_policy` to hav relevant ACM and route53 permissions
+
 ## v0.2.1 - Fix bootstrap_policy and dynamo modules
 
 * The bootstrap_policy module was missing a number of IAM permissions
