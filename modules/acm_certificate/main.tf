@@ -66,7 +66,7 @@ resource "aws_acm_certificate" "pulsar_certificate" {
   validation_method         = "DNS"
   tags = merge(
     {
-      Name        = replace(var.domain_name, "*", "_")
+      Name = replace(var.domain_name, "*", "_")
     },
     var.tags,
   )
