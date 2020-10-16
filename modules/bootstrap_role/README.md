@@ -38,6 +38,7 @@ module "bootstrap_role" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| allow\_acm\_certificate\_management | will grant this policy IAM permissions to create ACM certificate and validate certificate through Route53 | `bool` | `true` | no |
 | allow\_eks\_management | will grant this policy all permissions need to create and manage EKS clusters, which includes EC2, VPC, and many other permissions | `bool` | `false` | no |
 | allow\_iam\_management | will grant this policy IAM permissions to create and manage roles and policies, which can allow privilege escalation | `bool` | `false` | no |
 | allow\_iam\_policy\_create | will grant this policy the permission to create IAM policies, which is required by some of our modules, but not actually the ability to attach those policies | `bool` | `true` | no |
@@ -45,6 +46,7 @@ module "bootstrap_role" {
 | allow\_vault\_management | will grant this policy permisions to manage a dynamo table and KMS key/alias, which can be limited by `dynamo_table_prefix` and `kms_alias_prefix` options respectively | `bool` | `true` | no |
 | allowed\_regions | if you want to constrain this role to a given region, specify this property, otherwise, all regions are allowed | `string` | `"*"` | no |
 | dynamo\_table\_prefix | a prefix that can limit the tables this role can manage | `string` | `""` | no |
+| hostedzones\_arns | the arns of the allowed hostedzones | `list(string)` | <pre>[<br>  "arn:aws:route53:::hostedzone/*"<br>]</pre> | no |
 | kms\_alias\_prefix | a prefix that can limit the kms aliases this role can manage | `string` | `""` | no |
 | policy\_name | the name of the policy, defaults to same as role\_name | `string` | `""` | no |
 | role\_name | the name of the role to be created | `any` | n/a | yes |
