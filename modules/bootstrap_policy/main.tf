@@ -459,6 +459,7 @@ data "aws_iam_policy_document" "acm_certificate" {
   statement {
     actions = [
       "route53:ChangeResourceRecordSets",
+      "route53:GetHostedZone",
       "route53:ListResourceRecordSets"
     ]
 
