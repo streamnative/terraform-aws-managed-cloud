@@ -470,7 +470,8 @@ data "aws_iam_policy_document" "acm_certificate" {
     actions = [
       "route53:GetChange",
       "route53:ListHostedZonesByName",
-      "route53:ListHostedZones"
+      "route53:ListHostedZones",
+      "route53:ListTagsForResource"
     ]
 
     resources = [

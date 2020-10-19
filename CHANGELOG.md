@@ -1,3 +1,7 @@
+## v0.3.2 - Add (one more) policy for lookups
+
+* Adds `route53:ListTagsForResource` to the bootstrap policy
+
 ## v0.3.1 - Add additional route53 policy for lookups
 
 * Adds `route53:ListHostedZones` to the bootstrap policy
