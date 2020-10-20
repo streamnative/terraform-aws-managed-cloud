@@ -47,6 +47,18 @@ variable "asg_arns" {
   default     = ["*"]
 }
 
+variable "allow_nodegroup_management" {
+  description = "will grant this policy the permission to update nodegroups (specified in nodegroup_arns)"
+  type        = bool
+  default     = true
+}
+
+variable "allow_asg_management" {
+  description = "will grant this policy the permission to update asg (specified in asg_arns)"
+  type        = bool
+  default     = true
+}
+
 
 data "aws_caller_identity" "current" {}
 
@@ -83,7 +95,9 @@ data "aws_iam_policy_document" "manage" {
 
     resources = ["*"]
   }
+}
 
+data "aws_iam_policy_document" "nodegroup" {
   // Nodegroup
   statement {
     actions = [
@@ -94,6 +108,9 @@ data "aws_iam_policy_document" "manage" {
     resources = var.nodegroup_arns
   }
 
+}
+
+data "aws_iam_policy_document" "asg" {
   // ASG
   statement {
     actions = [
@@ -110,10 +127,23 @@ data "aws_iam_policy_document" "manage" {
   }
 }
 
+locals {
+  nodegroup_management = var.allow_nodegroup_management ? [data.aws_iam_policy_document.nodegroup.json] : []
+  asg_management       = var.allow_asg_management ? [data.aws_iam_policy_document.asg.json] : []
+  policies             = concat([data.aws_iam_policy_document.manage.json], local.nodegroup_management, local.asg_management)
+}
+
+module "policy_agg" {
+  source  = "cloudposse/iam-policy-document-aggregator/aws"
+  version = "0.6.0"
+
+  source_documents = local.policies
+}
+
 resource "aws_iam_policy" "policy" {
   name = var.policy_name
 
-  policy = data.aws_iam_policy_document.manage.json
+  policy = module.policy_agg.result_document
 }
 
 
