@@ -1,3 +1,7 @@
+## v0.3.3 - Make management policy more granular
+
+* Makes the management policy more flexible to not need all permissions
+
 ## v0.3.2 - Add (one more) policy for lookups
 
 * Adds `route53:ListTagsForResource` to the bootstrap policy
