@@ -61,6 +61,18 @@ variable "asg_arns" {
   default     = ["*"]
 }
 
+variable "allow_nodegroup_management" {
+  description = "will grant this policy the permission to update nodegroups (specified in nodegroup_arns)"
+  type        = bool
+  default     = true
+}
+
+variable "allow_asg_management" {
+  description = "will grant this policy the permission to update asg (specified in asg_arns)"
+  type        = bool
+  default     = true
+}
+
 
 module "role" {
   source    = "../streamnative_role"
@@ -74,9 +86,11 @@ module "policy" {
   source      = "../management_policy"
   policy_name = coalesce(var.policy_name, var.role_name)
 
-
   nodegroup_arns = var.nodegroup_arns
   asg_arns       = var.asg_arns
+
+  allow_nodegroup_management = var.allow_nodegroup_management
+  allow_asg_management       = var.allow_asg_management
 }
 
 resource "aws_iam_role_policy_attachment" "attach" {
