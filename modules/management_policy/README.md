@@ -37,6 +37,8 @@ module "manager_policy" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| allow\_asg\_management | will grant this policy the permission to update asg (specified in asg\_arns) | `bool` | `true` | no |
+| allow\_nodegroup\_management | will grant this policy the permission to update nodegroups (specified in nodegroup\_arns) | `bool` | `true` | no |
 | asg\_arns | the arns of the allowed ASG groups | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
 | nodegroup\_arns | the arns of the allowed EKS nodegroup's to manage | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
 | policy\_name | the name of policy to be created | `any` | n/a | yes |
