@@ -1,3 +1,7 @@
+## v0.3.4 - Expose same opts in management role
+
+* Expose the same new props from management_policy into the role
+
 ## v0.3.3 - Make management policy more granular
 
 * Makes the management policy more flexible to not need all permissions
