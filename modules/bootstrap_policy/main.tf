@@ -318,6 +318,7 @@ data "aws_iam_policy_document" "eks" {
       "ec2:DescribeImages",
       "ec2:describeAddresses",
       "ec2:DescribeVpcs",
+      "ec2:DescribeRegions",
       "ec2:CreateLaunchTemplate",
       "ec2:DescribeLaunchTemplates",
       "ec2:RunInstances",
