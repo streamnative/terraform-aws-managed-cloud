@@ -108,6 +108,7 @@ output "role_arn" {
 output "policy_name" {
   value = module.role.policy_name
 }
+
 output "policy_arn" {
   value = module.role.policy_arn
 }
@@ -120,6 +121,7 @@ output "s3_bucket" {
   value       = aws_s3_bucket.pulsar_offload.bucket
   description = "the name of the bucket used for offloading"
 }
+
 output "s3_bucket_arn" {
   value       = aws_s3_bucket.pulsar_offload.arn
   description = "the arn of the bucket used for offloading"
