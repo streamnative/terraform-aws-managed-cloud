@@ -1,24 +1,24 @@
 /**
- * # Tiered Storage for AWS
+ * # Velero backup for Pulsar in AWS
  *
  * This terraform module creates the needed s3 bucket
  * and IAM policies, plus role creation/attachment
- * that is needed for storage offloading in Pulsar.
+ * that is needed for backing up Pulsar using velero.
  *
  * This bucket also enables bucket encrpytion by default
  *
  * See the parameters for full details but here is an example usage:
  *
  * ```
- * module "tiered_storage" {
- *   source = "streamnative/managed-cloud/aws//tiered_storage"
- *   bucket_name = "myorg-pulsar-offload-us-east-1"
+ * module "backup" {
+ *   source = "streamnative/managed-cloud/aws//backup"
+ *   bucket_name = "myorg-velero-backup-us-east-1"
  *   bucket_tags = {
  *     Project = "MyApp"
  *     Environment = "Prod"
  *   }
  *   # attach policy to existing role
- *   existing_role_name = "my-pulsar-cluster-role"
+ *   existing_role_name = "my-velero-cluster-role"
  * }
  * ```
  */
@@ -51,7 +51,7 @@ variable "new_role_name" {
   default     = ""
 }
 
-resource "aws_s3_bucket" "pulsar_offload" {
+resource "aws_s3_bucket" "velero_backup" {
   bucket = var.bucket_name
   acl    = "private"
 
@@ -72,26 +72,44 @@ module "role" {
   existing_role_name = var.existing_role_name
   new_role_name      = var.new_role_name
 
-  policy_name = "pulsar_offload"
-  role_policy = data.aws_iam_policy_document.pulsar_offload.json
+  policy_name = "velero_backup"
+  role_policy = data.aws_iam_policy_document.velero_backup.json
 
 }
 
-data "aws_iam_policy_document" "pulsar_offload" {
+data "aws_iam_policy_document" "velero_backup" {
 
   statement {
     actions = [
-      "s3:AbortMultipartUpload",
-      "s3:DeleteObject*",
-      "s3:GetObject*",
-      "s3:PutObject*",
-      "s3:List*",
+      "ec2:DescribeVolumes",
+      "ec2:DescribeSnapshots",
+      "ec2:CreateTags",
+      "ec2:CreateVolume",
+      "ec2:CreateSnapshot",
+      "ec2:DeleteSnapshot"
     ]
 
-    resources = [
-      aws_s3_bucket.pulsar_offload.arn,
-      "${aws_s3_bucket.pulsar_offload.arn}/*",
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:DeleteObject",
+      "s3:PutObject",
+      "s3:AbortMultipartUpload",
+      "s3:ListMultipartUploadParts"
     ]
+
+    resources = ["${aws_s3_bucket.velero_backup.arn}/*"]
+  }
+
+  statement {
+    actions = [
+      "s3:ListBucket",
+    ]
+
+    resources = [aws_s3_bucket.velero_backup.arn]
   }
 }
 
@@ -114,15 +132,15 @@ output "policy_arn" {
 }
 
 output "policy_document" {
-  value = data.aws_iam_policy_document.pulsar_offload.json
+  value = data.aws_iam_policy_document.velero_backup.json
 }
 
 output "s3_bucket" {
-  value       = aws_s3_bucket.pulsar_offload.bucket
-  description = "the name of the bucket used for offloading"
+  value       = aws_s3_bucket.velero_backup.bucket
+  description = "the name of the bucket used for backups"
 }
 
 output "s3_bucket_arn" {
-  value       = aws_s3_bucket.pulsar_offload.arn
-  description = "the arn of the bucket used for offloading"
+  value       = aws_s3_bucket.velero_backup.arn
+  description = "the arn of the bucket used for backups"
 }
