@@ -50,6 +50,11 @@ variable "new_role_name" {
   description = "an optional role name to create and attach the policy to"
   default     = ""
 }
+   
+variable "" {
+  description = "the name of the policy"
+  default     = "policy_name"
+}
 
 resource "aws_s3_bucket" "pulsar_offload" {
   bucket = var.bucket_name
@@ -72,7 +77,7 @@ module "role" {
   existing_role_name = var.existing_role_name
   new_role_name      = var.new_role_name
 
-  policy_name = "pulsar_offload"
+  policy_name = var.policy_name
   role_policy = data.aws_iam_policy_document.pulsar_offload.json
 
 }
