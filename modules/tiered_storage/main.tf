@@ -50,7 +50,7 @@ variable "new_role_name" {
   description = "an optional role name to create and attach the policy to"
   default     = ""
 }
-   
+
 variable "policy_name" {
   description = "the name of the policy"
   default     = "pulsar_offload"
