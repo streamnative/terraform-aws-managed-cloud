@@ -51,9 +51,9 @@ variable "new_role_name" {
   default     = ""
 }
    
-variable "" {
+variable "policy_name" {
   description = "the name of the policy"
-  default     = "policy_name"
+  default     = "pulsar_offload"
 }
 
 resource "aws_s3_bucket" "pulsar_offload" {
