@@ -41,7 +41,7 @@ locals {
   issuerUrl = data.aws_eks_cluster.cluster.identity.0.oidc.0.issuer
 }
 
-data aws_iam_policy_document "base_policy" {
+data "aws_iam_policy_document" "base_policy" {
   statement {
     actions = [
       "sts:GetCallerIdentity"
