@@ -16,7 +16,7 @@ module "boostrap_full" {
 }
 
 # useful if you just want to render the policy and directly apply to another role
-module "boostrap_full_render_only" {
+module "bootstrap_full_render_only" {
   source      = "../../modules/bootstrap_policy"
   policy_name = "streamnative-mc-bootstrap-full"
 
