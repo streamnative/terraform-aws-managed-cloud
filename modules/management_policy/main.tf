@@ -59,6 +59,12 @@ variable "allow_asg_management" {
   default     = true
 }
 
+variable "create_policy" {
+  description = "actually create the policy, otherwise just render the policy"
+  type        = bool
+  default     = true
+}
+
 
 data "aws_caller_identity" "current" {}
 
@@ -141,19 +147,20 @@ module "policy_agg" {
 }
 
 resource "aws_iam_policy" "policy" {
-  name = var.policy_name
+  name  = var.policy_name
+  count = var.create_policy ? 1 : 0
 
   policy = module.policy_agg.result_document
 }
 
 
 output "policy_name" {
-  value       = aws_iam_policy.policy.name
+  value       = join("", aws_iam_policy.policy.*.name)
   description = "the name of the policy"
 }
 
 output "policy_arn" {
-  value       = aws_iam_policy.policy.arn
+  value       = join("", aws_iam_policy.policy.*.arn)
   description = "the arn of the policy"
 }
 
