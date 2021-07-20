@@ -106,6 +106,12 @@ variable "hostedzones_arns" {
   default     = ["arn:aws:route53:::hostedzone/*"]
 }
 
+variable "create_policy" {
+  description = "actually create the policy, otherwise just render the policy"
+  type        = bool
+  default     = true
+}
+
 data "aws_caller_identity" "current" {}
 
 locals {
@@ -310,7 +316,7 @@ data "aws_iam_policy_document" "eks" {
       "ec2:*NatGateway*",
       "ec2:*InternetGateway*",
       "ec2:CreateTags",
-      "ec2:CreateLaunchTemplate",
+      "ec2:*LaunchTemplate",
       "ec2:AuthorizeSecurityGroupIngress",
       "ec2:AuthorizeSecurityGroupEgress",
       "ec2:AllocateAddress"
@@ -376,9 +382,7 @@ data "aws_iam_policy_document" "eks" {
   // OIDC (for usage with eksctl)
   statement {
     actions = [
-      "iam:CreateOpenIDConnectProvider",
-      "iam:DeleteOpenIDConnectProvider",
-      "iam:GetOpenIDConnectProvider",
+      "iam:*OpenIDConnectProvider",
     ]
     resources = [
       "arn:aws:iam::${local.accountId}:oidc-provider/*"
@@ -490,19 +494,20 @@ module "policy_agg" {
 }
 
 resource "aws_iam_policy" "policy" {
-  name = var.policy_name
+  name  = var.policy_name
+  count = var.create_policy ? 1 : 0
 
   policy = module.policy_agg.result_document
 }
 
 
 output "policy_name" {
-  value       = aws_iam_policy.policy.name
+  value       = join("", aws_iam_policy.policy.*.name)
   description = "the name of the policy"
 }
 
 output "policy_arn" {
-  value       = aws_iam_policy.policy.arn
+  value       = join("", aws_iam_policy.policy.*.arn)
   description = "the arn of the policy"
 }
 
