@@ -33,6 +33,7 @@ terraform {
 
 variable "prefix" {
   description = "the prefix to use for creating the resources associated with this module"
+  type        = string
 }
 
 variable "resource_tags" {
@@ -44,16 +45,19 @@ variable "resource_tags" {
 variable "existing_role_name" {
   description = "an optional existing role name to attach the policy to"
   default     = ""
+  type        = string
 }
 
 variable "new_role_name" {
   description = "the name of the role to be created and policy to attach to"
   default     = ""
+  type        = string
 }
 
 variable "dynamo_billing_mode" {
   description = "the billing mode for the dynamodb table that will be created"
   default     = "PAY_PER_REQUEST"
+  type        = string
 }
 
 variable "dynamo_provisioned_capacity" {

@@ -33,6 +33,7 @@ terraform {
 
 variable "policy_name" {
   description = "the name of policy to be created"
+  type        = string
 }
 
 variable "nodegroup_arns" {
@@ -71,7 +72,6 @@ data "aws_caller_identity" "current" {}
 locals {
   accountId = data.aws_caller_identity.current.account_id
 }
-
 
 data "aws_iam_policy_document" "manage" {
   // readonly

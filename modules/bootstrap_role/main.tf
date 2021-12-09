@@ -41,15 +41,18 @@ variable "tags" {
 
 variable "role_name" {
   description = "the name of the role to be created"
+  type        = string
 }
 
 variable "policy_name" {
   description = "the name of the policy, defaults to same as role_name"
   default     = ""
+  type        = string
 }
 
 variable "streamnative_arns" {
   description = "the arns to grant assume role to, will be principals from streamnative"
+  type        = string
 }
 
 variable "allow_iam_policy_create" {
@@ -91,21 +94,25 @@ variable "allow_acm_certificate_management" {
 variable "s3_bucket_prefix" {
   description = "a prefix that can limit the buckets this role can manage"
   default     = ""
+  type        = string
 }
 
 variable "dynamo_table_prefix" {
   description = "a prefix that can limit the tables this role can manage"
   default     = ""
+  type        = string
 }
 
 variable "kms_alias_prefix" {
   description = "a prefix that can limit the kms aliases this role can manage"
   default     = ""
+  type        = string
 }
 
 variable "allowed_regions" {
   description = "if you want to constrain this role to a given region, specify this property, otherwise, all regions are allowed"
   default     = "*"
+  type        = string
 }
 
 variable "hostedzones_arns" {

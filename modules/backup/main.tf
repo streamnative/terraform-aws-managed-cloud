@@ -44,11 +44,13 @@ variable "bucket_tags" {
 variable "existing_role_name" {
   description = "an optional existing role name to attach the policy to"
   default     = ""
+  type        = string
 }
 
 variable "new_role_name" {
   description = "an optional role name to create and attach the policy to"
   default     = ""
+  type        = string
 }
 
 resource "aws_s3_bucket" "velero_backup" {
@@ -66,7 +68,6 @@ resource "aws_s3_bucket" "velero_backup" {
   tags = var.bucket_tags
 }
 
-
 module "role" {
   source             = "../base_policy_role"
   existing_role_name = var.existing_role_name
@@ -78,7 +79,6 @@ module "role" {
 }
 
 data "aws_iam_policy_document" "velero_backup" {
-
   statement {
     actions = [
       "ec2:DescribeVolumes",
