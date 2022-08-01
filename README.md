@@ -1,3 +1,5 @@
+# DEPRECATED - PLEASE USE https://github.com/streamnative/terraform-aws-cloud INSTEAD
+
 # AWS StreamNative Managed Cloud Modules
 This repo contains terraform scripts that can be used to provision resources needed for StreamNative Managed Cloud in AWS
 
