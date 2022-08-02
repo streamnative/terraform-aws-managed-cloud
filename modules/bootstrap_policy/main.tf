@@ -83,21 +83,25 @@ variable "allow_acm_certificate_management" {
 variable "s3_bucket_prefix" {
   description = "a prefix that can limit the buckets this role can manage"
   default     = ""
+  type        = string
 }
 
 variable "dynamo_table_prefix" {
   description = "a prefix that can limit the tables this role can manage"
   default     = ""
+  type        = string
 }
 
 variable "kms_alias_prefix" {
   description = "a prefix that can limit the kms aliases this role can manage"
   default     = ""
+  type        = string
 }
 
 variable "allowed_regions" {
   description = "if you want to constrain this role to a given region, specify this property, otherwise, all regions are allowed"
   default     = "*"
+  type        = string
 }
 
 variable "hostedzones_arns" {

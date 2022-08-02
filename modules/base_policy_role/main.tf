@@ -26,11 +26,13 @@ variable "role_tags" {
 
 variable "policy_name" {
   description = "the name of the managed policy to be created and name given to attached policy"
+  type        = string
 }
 
 variable "existing_role_name" {
   description = "an optional existing role name, if not provided, a role with role_name will be created"
   default     = ""
+  type        = string
 }
 
 variable "new_role_name" {
@@ -41,11 +43,23 @@ variable "new_role_name" {
 variable "role_policy" {
   description = "the default policy to be added for the role, or an additional policy to attach to the existing role name"
   default     = "{}"
+  type        = string
+
+  validation {
+    condition     = can(jsondecode(var.role_policy))
+    error_message = "The role_policy value must be valid json."
+  }
 }
 
 variable "assume_role_policy" {
   description = "the assume role policy, if not provided, defaults to just be for ec2 service"
   default     = ""
+  type        = string
+
+  validation {
+    condition     = can(jsondecode(var.assume_role_policy)) || var.assume_role_policy == ""
+    error_message = "The assume_role_policy value must be valid json or empty string."
+  }
 }
 
 locals {

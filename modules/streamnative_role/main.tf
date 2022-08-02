@@ -21,6 +21,7 @@ variable "tags" {
 
 variable "role_name" {
   description = "the name of the role to be created"
+  type        = string
 }
 
 variable "assume_role_principals" {
@@ -41,14 +42,11 @@ data "aws_iam_policy_document" "assume" {
   }
 }
 
-
 resource "aws_iam_role" "role" {
   name               = var.role_name
   assume_role_policy = data.aws_iam_policy_document.assume.json
   tags               = var.tags
 }
-
-
 
 output "role_name" {
   value       = aws_iam_role.role.name

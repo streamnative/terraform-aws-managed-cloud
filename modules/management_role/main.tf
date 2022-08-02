@@ -38,15 +38,18 @@ variable "tags" {
 
 variable "role_name" {
   description = "the name of the role to be created"
+  type        = string
 }
 
 variable "policy_name" {
   description = "the name of the policy, defaults to same as role_name"
   default     = ""
+  type        = string
 }
 
 variable "streamnative_arns" {
   description = "the arns to grant assume role to, will be principals from streamnative"
+  type        = list(string)
 }
 
 variable "nodegroup_arns" {
